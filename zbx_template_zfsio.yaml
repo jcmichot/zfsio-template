@@ -1,0 +1,740 @@
+zabbix_export:
+  version: '7.2'
+  template_groups:
+    - uuid: 846977d1dfed4968bc5f8bdb363285bc
+      name: 'Templates/Operating systems'
+  templates:
+    - uuid: ab110f054bd4462591ccb2aace4969cd
+      template: 'ZFS iostats'
+      name: 'ZFS iostats'
+      description: 'ZFS iostat'
+      groups:
+        - name: 'Templates/Operating systems'
+      items:
+        - uuid: b3c36b3942cf45958073b5cdee895350
+          name: zfs.arcstats.arc_meta_used
+          key: zfs.arcstats.arc_meta_used
+          units: Bytes
+          tags:
+            - tag: os
+              value: zfs
+            - tag: zfs
+              value: stats
+        - uuid: a69a42bbcb2746bf80e7a064a4d3a7af
+          name: zfs.arcstats.compressed_size
+          key: zfs.arcstats.compressed_size
+          units: Bytes
+          tags:
+            - tag: os
+              value: zfs
+            - tag: zfs
+              value: stats
+        - uuid: ea7817e32c2442feb18033f7b4c4caf7
+          name: zfs.arcstats.hdr_size
+          key: zfs.arcstats.hdr_size
+          units: Bytes
+          tags:
+            - tag: os
+              value: zfs
+            - tag: zfs
+              value: stats
+        - uuid: 77a32b69c50944df98738a42d8acbdf9
+          name: zfs.arcstats.hits
+          key: zfs.arcstats.hits
+          units: Bytes
+          tags:
+            - tag: os
+              value: zfs
+            - tag: zfs
+              value: stats
+        - uuid: b9fb926e1a42459b9fd8efcc3eafc164
+          name: zfs.arcstats.hit_ratio
+          type: CALCULATED
+          key: zfs.arcstats.hit_ratio
+          value_type: FLOAT
+          units: '%'
+          params: '100 * last(//zfs.arcstats.hits) / ( last(//zfs.arcstats.hits)+last(//zfs.arcstats.misses) )'
+          tags:
+            - tag: zfs
+              value: stats
+        - uuid: 89d4695ae8444cf59448066bb58e36a2
+          name: zfs.arcstats.metadata_size
+          key: zfs.arcstats.metadata_size
+          units: Bytes
+          tags:
+            - tag: os
+              value: zfs
+            - tag: zfs
+              value: stats
+        - uuid: b1e59d233f77410abb0f7f5b50d5d000
+          name: zfs.arcstats.mfu_size
+          key: zfs.arcstats.mfu_size
+          units: Bytes
+          tags:
+            - tag: os
+              value: zfs
+            - tag: zfs
+              value: stats
+        - uuid: 7e29be1642fa432bb34f51eecc45cd0a
+          name: zfs.arcstats.misses
+          key: zfs.arcstats.misses
+          units: Bytes
+          tags:
+            - tag: os
+              value: zfs
+            - tag: zfs
+              value: stats
+        - uuid: 82ab92ff3be54a948d716b70a11f38f3
+          name: zfs.arcstats.mru_size
+          key: zfs.arcstats.mru_size
+          units: Bytes
+          tags:
+            - tag: os
+              value: zfs
+            - tag: zfs
+              value: stats
+        - uuid: 40ecb770e04f45ef84ab569987ad2bd7
+          name: zfs.arcstats.size
+          key: zfs.arcstats.size
+          units: Bytes
+          tags:
+            - tag: os
+              value: zfs
+            - tag: zfs
+              value: stats
+        - uuid: a1599017ed494c7fa2a58de62403c743
+          name: zfs.arcstats.uncompressed_size
+          key: zfs.arcstats.uncompressed_size
+          units: Bytes
+          tags:
+            - tag: os
+              value: zfs
+            - tag: zfs
+              value: stats
+        - uuid: 1d80998b1708405ca76b322623f9f8b5
+          name: zfs.zfetchstats.hits
+          key: zfs.zfetchstats.hits
+          units: Bytes
+          tags:
+            - tag: os
+              value: zfs
+            - tag: zfs
+              value: stats
+        - uuid: 7e94b01170a2465fa89f9bd8795e2b01
+          name: zfs.zfetchstats.hit_ratio
+          type: CALCULATED
+          key: zfs.zfetchstats.hit_ratio
+          value_type: FLOAT
+          units: '%'
+          params: '100 * last(//zfs.zfetchstats.hits) / ( last(//zfs.zfetchstats.hits)+last(//zfs.zfetchstats.misses) )'
+          tags:
+            - tag: zfs
+              value: stats
+        - uuid: 56a8c2d55d1a49a6b80a5fc3a2260121
+          name: zfs.zfetchstats.misses
+          key: zfs.zfetchstats.misses
+          units: Bytes
+          tags:
+            - tag: os
+              value: zfs
+            - tag: zfs
+              value: stats
+        - uuid: d6569dfbc32747ccb65dc16e9b26aa75
+          name: zpool.healthwarn
+          key: zpool.healthwarn
+          delay: 5m
+          tags:
+            - tag: component
+              value: storage
+            - tag: zfs
+              value: stats
+          triggers:
+            - uuid: 2b158a0c956e4dafa08639f50c943ae8
+              expression: 'last(/ZFS iostats/zpool.healthwarn)<>0'
+              name: 'check zpool status'
+              priority: HIGH
+              tags:
+                - tag: zfs
+                  value: stats
+      discovery_rules:
+        - uuid: 0a0b3b3af6ce40d6aa3936ef25fd1aa8
+          name: 'FreeBSD ZFS iostat discovery'
+          key: zfs.discovery
+          delay: 1h
+          item_prototypes:
+            - uuid: cdf11684c23c47aeb33280d83847b448
+              name: 'zfsio [{#ZFSSTATS}] asyncq wait read'
+              key: 'zfs.iostat[{#ZFSSTATS}_asyncq_wait_read]'
+              value_type: FLOAT
+              units: s
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+                - type: MULTIPLIER
+                  parameters:
+                    - '1.0E-9'
+              tags:
+                - tag: class
+                  value: os
+                - tag: target
+                  value: zfs
+            - uuid: 770ce22cefa3400fba645c30e0af9be0
+              name: 'zfsio [{#ZFSSTATS}] asyncq wait write'
+              key: 'zfs.iostat[{#ZFSSTATS}_asyncq_wait_write]'
+              value_type: FLOAT
+              units: s
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+                - type: MULTIPLIER
+                  parameters:
+                    - '1.0E-9'
+              tags:
+                - tag: class
+                  value: os
+                - tag: target
+                  value: zfs
+            - uuid: d4a309124938433889b175995d8feceb
+              name: 'zfsio [{#ZFSSTATS}] bandwidth read'
+              key: 'zfs.iostat[{#ZFSSTATS}_bandwidth_read]'
+              units: Bytes/s
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+              tags:
+                - tag: class
+                  value: os
+                - tag: target
+                  value: zfs
+            - uuid: f7495068117e4c9281852c7c532525d7
+              name: 'zfsio [{#ZFSSTATS}] bandwidth write'
+              key: 'zfs.iostat[{#ZFSSTATS}_bandwidth_write]'
+              units: Bytes/s
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+              tags:
+                - tag: class
+                  value: os
+                - tag: target
+                  value: zfs
+            - uuid: b567e578879d4e16b2c727ff9e68ffe4
+              name: 'zfsio [{#ZFSSTATS}] capacity alloc'
+              key: 'zfs.iostat[{#ZFSSTATS}_capacity_alloc]'
+              units: Bytes
+              tags:
+                - tag: class
+                  value: os
+                - tag: target
+                  value: zfs
+            - uuid: b41d7aa164084f0ab7c6b0b46b9fba34
+              name: 'zfsio [{#ZFSSTATS}] capacity free'
+              key: 'zfs.iostat[{#ZFSSTATS}_capacity_free]'
+              units: Bytes
+              tags:
+                - tag: class
+                  value: os
+                - tag: target
+                  value: zfs
+            - uuid: bff296e72b4b4419996cac18f6464a8a
+              name: 'zfsio [{#ZFSSTATS}] disk wait read'
+              key: 'zfs.iostat[{#ZFSSTATS}_disk_wait_read]'
+              value_type: FLOAT
+              units: s
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+                - type: MULTIPLIER
+                  parameters:
+                    - '1.0E-9'
+              tags:
+                - tag: class
+                  value: os
+                - tag: target
+                  value: zfs
+            - uuid: a3a4792dc2f4434f9c44499f1ae8e7a5
+              name: 'zfsio [{#ZFSSTATS}] disk wait write'
+              key: 'zfs.iostat[{#ZFSSTATS}_disk_wait_write]'
+              value_type: FLOAT
+              units: s
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+                - type: MULTIPLIER
+                  parameters:
+                    - '1.0E-9'
+              tags:
+                - tag: class
+                  value: os
+                - tag: target
+                  value: zfs
+            - uuid: 205818bdda6842258ba1ba553a81de18
+              name: 'zfsio [{#ZFSSTATS}] operations read'
+              key: 'zfs.iostat[{#ZFSSTATS}_operations_read]'
+              units: ops
+              tags:
+                - tag: class
+                  value: os
+                - tag: target
+                  value: zfs
+            - uuid: 867fd076275e4cc1a011dadccca2ac01
+              name: 'zfsio [{#ZFSSTATS}] operations write'
+              key: 'zfs.iostat[{#ZFSSTATS}_operations_write]'
+              units: ops
+              tags:
+                - tag: class
+                  value: os
+                - tag: target
+                  value: zfs
+            - uuid: 70523b520d8a4e8c9987c6d512421adb
+              name: 'zfsio [{#ZFSSTATS}] scrub wait'
+              key: 'zfs.iostat[{#ZFSSTATS}_scrub_wait]'
+              value_type: FLOAT
+              units: s
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+                - type: MULTIPLIER
+                  parameters:
+                    - '1.0E-9'
+              tags:
+                - tag: class
+                  value: os
+                - tag: target
+                  value: zfs
+              trigger_prototypes:
+                - uuid: 400ea48d1316454f89735ac935f5e0c2
+                  expression: 'last(/ZFS iostats/zfs.iostat[{#ZFSSTATS}_scrub_wait])>10'
+                  name: 'zfsio [{#ZFSSTATS}] scrub_wait > 10 ms'
+                  priority: HIGH
+                  manual_close: 'YES'
+            - uuid: 06e00641b57a4445a1df82c8923ab018
+              name: 'zfsio [{#ZFSSTATS}] syncql wait read'
+              key: 'zfs.iostat[{#ZFSSTATS}_syncq_wait_read]'
+              value_type: FLOAT
+              units: s
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+                - type: MULTIPLIER
+                  parameters:
+                    - '1.0E-9'
+              tags:
+                - tag: class
+                  value: os
+                - tag: target
+                  value: zfs
+            - uuid: 7ef3a930201d4ab198cfcafa6b56c8f8
+              name: 'zfsio [{#ZFSSTATS}] syncql wait write'
+              key: 'zfs.iostat[{#ZFSSTATS}_syncq_wait_write]'
+              value_type: FLOAT
+              units: s
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+                - type: MULTIPLIER
+                  parameters:
+                    - '1.0E-9'
+              tags:
+                - tag: class
+                  value: os
+                - tag: target
+                  value: zfs
+            - uuid: 6f2b3312e7da4d3e85450eb38a4beb0e
+              name: 'zfsio [{#ZFSSTATS}] total wait read'
+              key: 'zfs.iostat[{#ZFSSTATS}_total_wait_read]'
+              value_type: FLOAT
+              units: s
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+                - type: MULTIPLIER
+                  parameters:
+                    - '1.0E-9'
+              tags:
+                - tag: class
+                  value: os
+                - tag: target
+                  value: zfs
+              trigger_prototypes:
+                - uuid: 5e0eb7fefe4c45fcb60670517bfc2dcc
+                  expression: 'last(/ZFS iostats/zfs.iostat[{#ZFSSTATS}_total_wait_read])>1'
+                  name: 'zfsio [{#ZFSSTATS}] total_wait_read > 1 ms'
+                  priority: HIGH
+                  manual_close: 'YES'
+            - uuid: e0c8f222c493412096c6b825de1caadd
+              name: 'zfsio [{#ZFSSTATS}] total wait write'
+              key: 'zfs.iostat[{#ZFSSTATS}_total_wait_write]'
+              value_type: FLOAT
+              units: s
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+                - type: MULTIPLIER
+                  parameters:
+                    - '1.0E-9'
+              tags:
+                - tag: class
+                  value: os
+                - tag: target
+                  value: zfs
+              trigger_prototypes:
+                - uuid: af4844081cbb4704a3ce8a2ab75e5aba
+                  expression: 'last(/ZFS iostats/zfs.iostat[{#ZFSSTATS}_total_wait_write])>1'
+                  name: 'zfsio [{#ZFSSTATS}] total_wait_write > 1 ms'
+                  priority: HIGH
+                  manual_close: 'YES'
+            - uuid: d614b73747a04d92be82ab83b9c24a7d
+              name: 'zfsio [{#ZFSSTATS}] trim wait'
+              key: 'zfs.iostat[{#ZFSSTATS}_trim_wait]'
+              value_type: FLOAT
+              units: s
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+                - type: MULTIPLIER
+                  parameters:
+                    - '1.0E-9'
+              tags:
+                - tag: class
+                  value: os
+                - tag: target
+                  value: zfs
+              trigger_prototypes:
+                - uuid: 464137b5ef1b49fc95346e22d1d914cb
+                  expression: 'last(/ZFS iostats/zfs.iostat[{#ZFSSTATS}_trim_wait])>10'
+                  name: 'zfsio [{#ZFSSTATS}] trim_wait > 10 ms'
+                  priority: HIGH
+                  manual_close: 'YES'
+          graph_prototypes:
+            - uuid: e2ba2b1184a74219a7f57bc3b8b378c4
+              name: '[{#ZFSSTATS}] asyncq_wait'
+              graph_items:
+                - color: 1A7C11
+                  calc_fnc: ALL
+                  item:
+                    host: 'ZFS iostats'
+                    key: 'zfs.iostat[{#ZFSSTATS}_asyncq_wait_read]'
+                - sortorder: '1'
+                  color: '274482'
+                  calc_fnc: ALL
+                  item:
+                    host: 'ZFS iostats'
+                    key: 'zfs.iostat[{#ZFSSTATS}_asyncq_wait_write]'
+            - uuid: 802dd7a042ef4bfea6e2b903cf4f8fd0
+              name: '[{#ZFSSTATS}] bandwidth'
+              graph_items:
+                - color: 1A7C11
+                  calc_fnc: ALL
+                  item:
+                    host: 'ZFS iostats'
+                    key: 'zfs.iostat[{#ZFSSTATS}_bandwidth_read]'
+                - sortorder: '1'
+                  color: '274482'
+                  calc_fnc: ALL
+                  item:
+                    host: 'ZFS iostats'
+                    key: 'zfs.iostat[{#ZFSSTATS}_bandwidth_write]'
+            - uuid: 082c0370c23d450b8c7e233bd6e883dc
+              name: '[{#ZFSSTATS}] capacity'
+              graph_items:
+                - color: 1A7C11
+                  calc_fnc: ALL
+                  item:
+                    host: 'ZFS iostats'
+                    key: 'zfs.iostat[{#ZFSSTATS}_capacity_alloc]'
+                - sortorder: '1'
+                  color: '274482'
+                  calc_fnc: ALL
+                  item:
+                    host: 'ZFS iostats'
+                    key: 'zfs.iostat[{#ZFSSTATS}_capacity_free]'
+            - uuid: 0253ea2ce5d44a188ed63f12e0fcad39
+              name: '[{#ZFSSTATS}] disk_wait'
+              graph_items:
+                - color: 1A7C11
+                  calc_fnc: ALL
+                  item:
+                    host: 'ZFS iostats'
+                    key: 'zfs.iostat[{#ZFSSTATS}_disk_wait_read]'
+                - sortorder: '1'
+                  color: '274482'
+                  calc_fnc: ALL
+                  item:
+                    host: 'ZFS iostats'
+                    key: 'zfs.iostat[{#ZFSSTATS}_disk_wait_write]'
+            - uuid: b12cb2881bb54cbcb219db45ca1625ee
+              name: '[{#ZFSSTATS}] operations'
+              graph_items:
+                - color: 1A7C11
+                  calc_fnc: ALL
+                  item:
+                    host: 'ZFS iostats'
+                    key: 'zfs.iostat[{#ZFSSTATS}_operations_read]'
+                - sortorder: '1'
+                  color: '274482'
+                  calc_fnc: ALL
+                  item:
+                    host: 'ZFS iostats'
+                    key: 'zfs.iostat[{#ZFSSTATS}_operations_write]'
+            - uuid: 28884b27549346ff9e965afaed8e7d46
+              name: '[{#ZFSSTATS}] scrub wait'
+              graph_items:
+                - color: 1A7C11
+                  calc_fnc: ALL
+                  item:
+                    host: 'ZFS iostats'
+                    key: 'zfs.iostat[{#ZFSSTATS}_scrub_wait]'
+            - uuid: 477d3afd852f45c38c216bfc2d235ea3
+              name: '[{#ZFSSTATS}] syncq_wait'
+              graph_items:
+                - color: 1A7C11
+                  calc_fnc: ALL
+                  item:
+                    host: 'ZFS iostats'
+                    key: 'zfs.iostat[{#ZFSSTATS}_syncq_wait_read]'
+                - sortorder: '1'
+                  color: '274482'
+                  calc_fnc: ALL
+                  item:
+                    host: 'ZFS iostats'
+                    key: 'zfs.iostat[{#ZFSSTATS}_syncq_wait_write]'
+            - uuid: 2ea97a7abecc42acb0a7304b452d29ae
+              name: '[{#ZFSSTATS}] totail_wait'
+              graph_items:
+                - color: 1A7C11
+                  calc_fnc: ALL
+                  item:
+                    host: 'ZFS iostats'
+                    key: 'zfs.iostat[{#ZFSSTATS}_total_wait_read]'
+                - sortorder: '1'
+                  color: '274482'
+                  calc_fnc: ALL
+                  item:
+                    host: 'ZFS iostats'
+                    key: 'zfs.iostat[{#ZFSSTATS}_total_wait_write]'
+            - uuid: 5a781c246fed4e54b5ff8a712b4bb8ce
+              name: '[{#ZFSSTATS}] trim_wait'
+              graph_items:
+                - color: 1A7C11
+                  calc_fnc: ALL
+                  item:
+                    host: 'ZFS iostats'
+                    key: 'zfs.iostat[{#ZFSSTATS}_trim_wait]'
+            - uuid: 2dbfaace1a3040ef8687496ed3113026
+              name: '[{#ZFSSTATS}] zfsio wait'
+              graph_items:
+                - color: 1A7C11
+                  calc_fnc: ALL
+                  item:
+                    host: 'ZFS iostats'
+                    key: 'zfs.iostat[{#ZFSSTATS}_asyncq_wait_read]'
+                - sortorder: '1'
+                  color: '274482'
+                  calc_fnc: ALL
+                  item:
+                    host: 'ZFS iostats'
+                    key: 'zfs.iostat[{#ZFSSTATS}_asyncq_wait_write]'
+                - sortorder: '2'
+                  color: F63100
+                  calc_fnc: ALL
+                  item:
+                    host: 'ZFS iostats'
+                    key: 'zfs.iostat[{#ZFSSTATS}_disk_wait_read]'
+                - sortorder: '3'
+                  color: 2774A4
+                  calc_fnc: ALL
+                  item:
+                    host: 'ZFS iostats'
+                    key: 'zfs.iostat[{#ZFSSTATS}_disk_wait_write]'
+                - sortorder: '4'
+                  color: A54F10
+                  calc_fnc: ALL
+                  item:
+                    host: 'ZFS iostats'
+                    key: 'zfs.iostat[{#ZFSSTATS}_scrub_wait]'
+                - sortorder: '5'
+                  color: FC6EA3
+                  calc_fnc: ALL
+                  item:
+                    host: 'ZFS iostats'
+                    key: 'zfs.iostat[{#ZFSSTATS}_syncq_wait_read]'
+                - sortorder: '6'
+                  color: 6C59DC
+                  calc_fnc: ALL
+                  item:
+                    host: 'ZFS iostats'
+                    key: 'zfs.iostat[{#ZFSSTATS}_syncq_wait_write]'
+                - sortorder: '7'
+                  color: AC8C14
+                  calc_fnc: ALL
+                  item:
+                    host: 'ZFS iostats'
+                    key: 'zfs.iostat[{#ZFSSTATS}_total_wait_read]'
+                - sortorder: '8'
+                  color: 611F27
+                  calc_fnc: ALL
+                  item:
+                    host: 'ZFS iostats'
+                    key: 'zfs.iostat[{#ZFSSTATS}_total_wait_write]'
+                - sortorder: '9'
+                  color: F230E0
+                  calc_fnc: ALL
+                  item:
+                    host: 'ZFS iostats'
+                    key: 'zfs.iostat[{#ZFSSTATS}_trim_wait]'
+      tags:
+        - tag: Application
+          value: zfs
+      dashboards:
+        - uuid: 4cd766d1cae846d993779fb47a8c48e5
+          name: 'ZFS ARC'
+          pages:
+            - widgets:
+                - type: svggraph
+                  name: 'ZFS ARC (Adaptive Replacement Cache)'
+                  width: '42'
+                  height: '8'
+                  fields:
+                    - type: STRING
+                      name: ds.0.color
+                      value: FF465C
+                    - type: STRING
+                      name: ds.0.items.0
+                      value: zfs.arcstats.arc_meta_used
+                    - type: STRING
+                      name: ds.0.items.1
+                      value: zfs.arcstats.hdr_size
+                    - type: STRING
+                      name: ds.0.items.2
+                      value: zfs.arcstats.metadata_size
+                    - type: STRING
+                      name: ds.0.items.3
+                      value: zfs.arcstats.size
+                    - type: STRING
+                      name: ds.1.color
+                      value: FFD54F
+                    - type: STRING
+                      name: ds.1.items.0
+                      value: zfs.arcstats.compressed_size
+                    - type: STRING
+                      name: ds.1.items.1
+                      value: zfs.arcstats.uncompressed_size
+                    - type: STRING
+                      name: ds.2.color
+                      value: 0EC9AC
+                    - type: STRING
+                      name: ds.2.items.0
+                      value: zfs.arcstats.mfu_size
+                    - type: STRING
+                      name: ds.2.items.1
+                      value: zfs.arcstats.mru_size
+                    - type: INTEGER
+                      name: legend_lines
+                      value: '8'
+                    - type: INTEGER
+                      name: legend_statistic
+                      value: '1'
+                    - type: STRING
+                      name: reference
+                      value: NAHQT
+                    - type: INTEGER
+                      name: righty
+                      value: '0'
+                - type: svggraph
+                  name: 'ZFS cache hit ratio (ARC & pre-fetch)'
+                  'y': '8'
+                  width: '42'
+                  height: '6'
+                  fields:
+                    - type: STRING
+                      name: ds.0.color
+                      value: 0080FF
+                    - type: STRING
+                      name: ds.0.data_set_label
+                      value: arcstats
+                    - type: STRING
+                      name: ds.0.items.0
+                      value: zfs.arcstats.hit_ratio
+                    - type: STRING
+                      name: ds.1.color
+                      value: 00FF00
+                    - type: STRING
+                      name: ds.1.data_set_label
+                      value: prefetch
+                    - type: STRING
+                      name: ds.1.items.0
+                      value: zfs.zfetchstats.hit_ratio
+                    - type: INTEGER
+                      name: ds.1.missingdatafunc
+                      value: '3'
+                    - type: INTEGER
+                      name: legend_lines
+                      value: '2'
+                    - type: INTEGER
+                      name: legend_statistic
+                      value: '1'
+                    - type: STRING
+                      name: reference
+                      value: PIKXJ
+                    - type: INTEGER
+                      name: righty
+                      value: '0'
+        - uuid: 0cbc0f197328454fa669e149aa39ffa8
+          name: 'ZFS iostats'
+          pages:
+            - widgets:
+                - type: graphprototype
+                  width: '56'
+                  height: '11'
+                  fields:
+                    - type: INTEGER
+                      name: columns
+                      value: '1'
+                    - type: GRAPH_PROTOTYPE
+                      name: graphid.0
+                      value:
+                        host: 'ZFS iostats'
+                        name: '[{#ZFSSTATS}] zfsio wait'
+                    - type: STRING
+                      name: reference
+                      value: GTGJA
+                - type: graphprototype
+                  name: '[{#ZFSSTATS}] operations'
+                  'y': '11'
+                  width: '56'
+                  height: '6'
+                  fields:
+                    - type: INTEGER
+                      name: columns
+                      value: '1'
+                    - type: GRAPH_PROTOTYPE
+                      name: graphid.0
+                      value:
+                        host: 'ZFS iostats'
+                        name: '[{#ZFSSTATS}] operations'
+                    - type: STRING
+                      name: reference
+                      value: GSVBS
+                - type: graphprototype
+                  name: '[{#ZFSSTATS}] bandwidth'
+                  'y': '17'
+                  width: '56'
+                  height: '6'
+                  fields:
+                    - type: INTEGER
+                      name: columns
+                      value: '1'
+                    - type: GRAPH_PROTOTYPE
+                      name: graphid.0
+                      value:
+                        host: 'ZFS iostats'
+                        name: '[{#ZFSSTATS}] bandwidth'
+                    - type: STRING
+                      name: reference
+                      value: HQQYC
+                - type: graphprototype
+                  name: '[{#ZFSSTATS}] capacity'
+                  'y': '23'
+                  width: '56'
+                  height: '6'
+                  fields:
+                    - type: INTEGER
+                      name: columns
+                      value: '1'
+                    - type: GRAPH_PROTOTYPE
+                      name: graphid.0
+                      value:
+                        host: 'ZFS iostats'
+                        name: '[{#ZFSSTATS}] capacity'
+                    - type: STRING
+                      name: reference
+                      value: JPBFE
